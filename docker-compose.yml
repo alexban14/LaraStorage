@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  db:
+    image: mariadb:10.7.5
+    environment:
+      MYSQL_ROOT_PASSWORD: dev123
+      MYSQL_DATABASE: web
+    volumes:
+      - db-data:/var/lib/mysql
+
+  redis:
+    image: redis:6.2.7
+
+  php:
+    build:
+      context: .
+      target: php
+      args:
+        - APP_ENV=local
+    environment:
+      - APP_ENV=local
+      - CONTAINER_ROLE=app
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - 6225:6225
+
+volumes:
+  db-data: ~

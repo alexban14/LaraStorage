@@ -1,0 +1,5 @@
+virtualmachines:
+  hosts:
+    production:
+      ansible_host: 64.227.116.195
+      ansible_user: root

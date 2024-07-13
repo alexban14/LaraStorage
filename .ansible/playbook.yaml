@@ -1,0 +1,61 @@
+---
+- name: Deploy Laravel on DigitalOcean
+  hosts: virtualmachines
+  tasks:
+    - name: Installing dependencies on server
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python3-pip
+        - python3-setuptools
+
+    - name: Install Docker on the server
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+
+    - name: Install Docker dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Copy Docker configuration files to the server
+      copy:
+        src: /home/banalexandru/1.Development/Demos/laravel-docker/.docker-deploy 
+        dest: /opt/app-dependencies/docker
+
+    - name: Build the Docker images
+      shell: docker-compose build
+      args:
+        chdir: /opt/app-dependencies/docker 
+
+    - name: Start the Docker containers
+      shell: docker-compose up -d
+      args:
+        chdir: /opt/app-dependencies/docker
