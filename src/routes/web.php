@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,13 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+Route::controller(FileController::class)
+    ->middleware(['auth', 'verified'])
+    ->group(function () {
+        Route::get('/user-files', 'show')->name('user-files');
+        Route::get('/folder/create', 'create')->name('folder.create');
+    });
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
