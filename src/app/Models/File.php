@@ -14,4 +14,19 @@ class File extends Model
     use NodeTrait;
     use SoftDeletes;
     use HasCreatorAndUpdater;
+
+    protected $fillable = [
+        'name',
+        'is_folder',
+        'path',
+        'mime',
+        'size',
+        'created_by',
+        'updated_by',
+    ];
+
+    public function isOwnedBy($userId): bool
+    {
+        return $this->created_by = $userId;
+    }
 }
