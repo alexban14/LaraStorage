@@ -30,7 +30,7 @@ Route::controller(FileController::class)
     ->middleware(['auth', 'verified'])
     ->group(function () {
         Route::get('/user-files', 'show')->name('user-files');
-        Route::get('/folder/create', 'create')->name('folder.create');
+        Route::post('/folder/store', 'storeFolder')->name('folder.store');
     });
 
 Route::get('/dashboard', function () {

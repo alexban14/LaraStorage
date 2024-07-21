@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreFolderRequest;
+use App\Http\Resources\FileResource;
 use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class FileController extends Controller
@@ -29,7 +31,7 @@ class FileController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreFolderRequest $request)
+    public function storeFolder(StoreFolderRequest $request)
     {
         $data = $request->validated();
         $parent = $request->parent;
@@ -38,12 +40,11 @@ class FileController extends Controller
             $parent = $this->getRoot();
         }
 
-        $file = File::create([
-            'is_folder' => 1,
-            'name' => $data['name']
-        ]);
-
+        $file = new File();
+        $file->is_folder = 1;
+        $file->name = $data['name'];
         $parent->appendNode($file);
+        $file->save();
     }
 
     /**
@@ -51,7 +52,16 @@ class FileController extends Controller
      */
     public function show()
     {
-        return Inertia::render('UserFiles');
+        $folder = $this->getRoot();
+        $files = File::query()->where('parent_id', $folder->id)
+                              ->where('created_by', Auth::id())
+                              ->orderBy('is_folder', 'desc')
+                              ->orderBy('created_at', 'desc')
+                              ->paginate(10);
+
+        $files = FileResource::collection($files);
+
+        return Inertia::render('UserFiles', compact('files'));
     }
 
     /**
@@ -80,6 +90,6 @@ class FileController extends Controller
 
     public function getRoot()
     {
-        return File::query()->where('created_by', Auth::id())->whereIsRoot()->firstOrFail();
+        return File::query()->whereIsRoot()->where('created_by', Auth::id())->firstOrFail();
     }
 }

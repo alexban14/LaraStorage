@@ -1,5 +1,5 @@
 <template>
-    <modal :show="modelValue">
+    <modal :show="modelValue" @show="onShow" >
         <div class="p-6">
             <h2 class="text-lg font-medium text-gray-900">
                 Create New Folder
@@ -7,8 +7,9 @@
             <div class="mt-6">
                 <InputLabel for="folderName" value="Folder Name" class="sr-only" />
                 <TextInput
-                    id="folderName"
+                    id="folderName" v-model="form.name"
                     type="text"
+                    ref="folderNameInput"
                     class="mt-1 block w-full"
                     :class="form.errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' "
                     placeholder="Folder Name"
@@ -18,6 +19,9 @@
             </div>
             <div class="mt-6 flex justify-end">
                 <SecondaryButton @click="closeModal"> Cancel </SecondaryButton>
+                <PrimaryButton @click="createFolder" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                    Submit
+                </PrimaryButton>
             </div>
         </div>
     </modal>
@@ -30,10 +34,14 @@ import InputLabel from '../InputLabel.vue';
 import InputError from '../InputError.vue';
 import { useForm } from '@inertiajs/vue3';
 import SecondaryButton from '../SecondaryButton.vue';
+import { nextTick, ref } from 'vue';
+import PrimaryButton from '../PrimaryButton.vue';
 
 const form = useForm({
     name: '',
 });
+
+const folderNameInput = ref(null);
 
 const {modelValue} = defineProps({
     modelValue: {
@@ -43,8 +51,24 @@ const {modelValue} = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+function onShow() {
+    nextTick(() => folderNameInput.value.focus());
+}
+
 function createFolder() {
-    console.log("Create Folder");
+    form.post(route('folder.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeModal();
+            form.reset();
+        },
+        onError: () => {
+            if (form.errors.name) {
+                form.reset('name');
+                nextTick(() => folderNameInput.value.focus());
+            }
+        }
+    })
 }
 
 function closeModal() {
