@@ -34,11 +34,8 @@ class FileController extends Controller
     public function storeFolder(StoreFolderRequest $request)
     {
         $data = $request->validated();
-        $parent = $request->parent;
 
-        if (!$parent) {
-            $parent = $this->getRoot();
-        }
+        $parent = $request->parent ?? $this->getRoot();
 
         $file = new File();
         $file->is_folder = 1;

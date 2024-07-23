@@ -26,7 +26,7 @@
                     </MenuItem>
                     <MenuItem v-slot="{ active }">
                         <ResponsiveNavLink
-                            :href="route('logout')"
+                            @click="logout"
                             :class="[
                                 active ? 'bg-violet-500 text-white' : 'text-gray-900',
                                 'group flex w-full items-center rounded-md px-2 py-2 text-sm',
@@ -44,4 +44,11 @@
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue'
+import { useForm } from '@inertiajs/vue3';
+
+const form = useForm({});
+
+const logout = () => {
+    form.post(route('logout'));
+}
 </script>

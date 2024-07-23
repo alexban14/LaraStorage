@@ -3,9 +3,11 @@
 namespace App\Http\Requests;
 
 use App\Models\File;
+use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class ParentIdBaseRequest extends FormRequest
@@ -16,8 +18,12 @@ class ParentIdBaseRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $this->parent = File::query()->where('id', $this->input('parent_id'))
-                                     ->first();
+        if ($this->input('parent_id')) {
+            $this->parent = File::where('id', $this->input('parent_id'))
+                                         ->first();
+        } else {
+            $this->parent = File::where('created_by', Auth::id())->whereIsRoot()->first();
+        }
 
         if ($this->parent && !$this->parent->isOwnedBy(Auth::id())) {
             return false;

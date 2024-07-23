@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Traits\HasCreatorAndUpdater;
-use Spinal;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -64,17 +63,12 @@ class File extends Model
         parent::boot();
 
         static::creating(function(File $model) {
-            Log::info('creating');
             if (!$model->parent) {
                 Log::info('model does not have parent');
                 return;
             }
 
-            Log::info($model->parent);
-
             $parentPath = !$model->parent->isRoot() ? $model->parent->path . '/' : '';
-
-            Log::info($parentPath);
 
             $model->path = $parentPath . Str::slug($model->name);
         });
