@@ -32,14 +32,17 @@ import Modal from '@/Components/Modal.vue';
 import TextInput from '../TextInput.vue';
 import InputLabel from '../InputLabel.vue';
 import InputError from '../InputError.vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import SecondaryButton from '../SecondaryButton.vue';
 import { nextTick, ref } from 'vue';
 import PrimaryButton from '../PrimaryButton.vue';
 
 const form = useForm({
     name: '',
+    parent_id: null
 });
+
+const page = usePage();
 
 const folderNameInput = ref(null);
 
@@ -56,6 +59,7 @@ function onShow() {
 }
 
 function createFolder() {
+    form.parent_id = page.props.folder.id;
     form.post(route('folder.store'), {
         preserveScroll: true,
         onSuccess: () => {

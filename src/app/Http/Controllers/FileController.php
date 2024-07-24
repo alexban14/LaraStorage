@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use PDO;
 
 class FileController extends Controller
 {
@@ -17,7 +18,6 @@ class FileController extends Controller
      */
     public function index()
     {
-        //
     }
 
     /**
@@ -47,9 +47,16 @@ class FileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show()
+    public function showFiles(?string $folderPath = null)
     {
-        $folder = $this->getRoot();
+        if ($folderPath) {
+            $folder = File::where('created_by', Auth::id())
+                ->where('path', $folderPath)
+                ->firstOrFail();
+        } else {
+            $folder = $this->getRoot();
+        }
+
         $files = File::query()->where('parent_id', $folder->id)
                               ->where('created_by', Auth::id())
                               ->orderBy('is_folder', 'desc')
@@ -58,7 +65,11 @@ class FileController extends Controller
 
         $files = FileResource::collection($files);
 
-        return Inertia::render('UserFiles', compact('files'));
+        $ancestors = FileResource::collection([...$folder->ancestors, $folder]);
+
+        $folder = new FileResource($folder);
+
+        return Inertia::render('UserFiles', compact('files', 'folder', 'ancestors'));
     }
 
     /**
