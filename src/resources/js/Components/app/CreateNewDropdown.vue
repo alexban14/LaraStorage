@@ -19,19 +19,9 @@
                         </a>
                     </MenuItem>
                 </div>
-                <div>
-                    <MenuItem v-slot="{ active }">
-                        <a class="text-grey-700 block px-4 py-2 text-sm">
-                            Upload Folder
-                        </a>
-                    </MenuItem>
-                </div>
-                <div>
-                    <MenuItem v-slot="{ active }">
-                        <a class="text-grey-700 block px-4 py-2 text-sm">
-                            Upload Files
-                        </a>
-                    </MenuItem>
+                <div class="px-1 py-1">
+                    <FileUploadMenuItem />
+                    <FolderUploadMenuItem />
                 </div>
             </MenuItems>
         </transition>
@@ -45,6 +35,8 @@ import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue'
 import CreateFolderModal from './CreateFolderModal.vue';
 import { ref } from 'vue';
+import FolderUploadMenuItem from './FolderUploadMenuItem.vue';
+import FileUploadMenuItem from './FileUploadMenuItem.vue';
 
 const createFolderModal = ref(false);
 
