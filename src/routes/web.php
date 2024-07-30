@@ -33,6 +33,7 @@ Route::controller(FileController::class)
             ->where('folderPath', '(.*)')
             ->name('user-files');
         Route::post('/folder', 'storeFolder')->name('folder.store');
+        Route::post('/file', 'store')->name('file.store');
     });
 
 Route::get('/dashboard', function () {

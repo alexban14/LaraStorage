@@ -23,6 +23,7 @@ class File extends Model
         'name',
         'is_folder',
         'path',
+        'storage_path',
         'mime',
         'size',
         'created_by',
