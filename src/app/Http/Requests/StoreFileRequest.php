@@ -99,18 +99,18 @@ class StoreFileRequest extends ParentIdBaseRequest
          * ]
          */
 
-        foreach ($filePaths as $i => $filePath) {
+        foreach ($filePaths as $index => $filePath) {
             $parts = explode('/', $filePath);
 
             $currentNode = &$tree;
 
-            foreach ($parts as $i => $part) {
+            foreach ($parts as $partIndex => $part) {
                 if (!isset($currentNode[$part])) {
                     $currentNode[$part] = [];
                 }
 
-                if ($i === count($parts) - 1 ) {
-                    $currentNode[$part] = $files[$i];
+                if ($partIndex === count($parts) - 1 ) {
+                    $currentNode[$part] = $files[$index];
                 } else {
                     $currentNode = &$currentNode[$part];
                 }

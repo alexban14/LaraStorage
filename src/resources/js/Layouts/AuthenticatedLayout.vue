@@ -70,8 +70,6 @@ function uploadFiles(files) {
     fileUploadForm.files = files;
     fileUploadForm.relative_paths = [...files].map(file => file.webkitRelativePath);
 
-    console.log(fileUploadForm.relative_paths);
-
     fileUploadForm.post(route('file.store'));
 }
 
