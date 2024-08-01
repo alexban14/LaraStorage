@@ -1,12 +1,12 @@
 <template>
-    <div class="h-screen bg-grey-50 flex w-full gap-4">
+    <div class="h-full bg-grey-50 flex w-full gap-4">
         <NavigationMenu />
 
         <main
             @drop.prevent="handleDrop"
             @dragover.prevent="onDragOver"
             @dragleave.prevent="onDragLeave"
-            class="flex flex-col flex-1 px-4 overflow-hidden"
+            class="flex flex-col flex-1 px-4 overflow-auto"
             :class="dragOver ? 'dropzone' :  '' ">
 
             <template v-if="dragOver" class="text-grey-500 text-center py-8 text-sm">
@@ -93,6 +93,7 @@ function uploadFiles(files) {
         onFinish: () => {
             fileUploadForm.clearErrors();
             fileUploadForm.reset();
+        }
     });
 }
 

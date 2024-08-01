@@ -76,7 +76,7 @@ class FileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function showFiles(?string $folderPath = null)
+    public function showFiles(Request $request, ?string $folderPath = null)
     {
         if ($folderPath) {
             $folder = File::where('created_by', Auth::id())
@@ -91,8 +91,13 @@ class FileController extends Controller
                               ->orderBy('is_folder', 'desc')
                               ->orderBy('created_at', 'desc')
                               ->paginate(10);
+                              /* ->paginate(10); */
 
         $files = FileResource::collection($files);
+
+        if ($request->wantsJson()) {
+            return $files;
+        }
 
         $ancestors = FileResource::collection([...$folder->ancestors, $folder]);
 

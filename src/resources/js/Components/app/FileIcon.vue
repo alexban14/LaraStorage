@@ -13,7 +13,7 @@
             <img class="max-w-full" v-else-if="isWord(file)" :src="`/images/icons/word.png`" />
             <img class="max-w-full" v-else-if="isExcel(file)" :src="`/images/icons/excel.png`" />
             <img class="max-w-full" v-else-if="isZip(file)" :src="`/images/icons/zip.png`" />
-            <img class="max-w-full" v-else-if="isText(file)" :src="`/images/icons/text.png`" />
+            <img class="max-w-full" v-else-if="isText(file)" :src="`/images/icons/txt-file.png`" />
             <img class="max-w-full" v-else :src="`/images/icons/attach-file.png`" />
         </template>
     </span>
