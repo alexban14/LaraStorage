@@ -22,10 +22,15 @@
                     </li>
                 </ol>
             </nav>
+            <pre>{{ allSelected }}</pre>
+            <pre>{{ selected }}</pre>
             <div class="flex-1 overflow-auto">
                 <table class="min-w-full">
                     <thead class="bg-grey-100 border-b">
                         <tr>
+                            <th class="text-sm font-medium text-gray-600 px-6 py-4 text-left" scope="col">
+                                <Checkbox @change="onSelectAllChange" v-model:checked="allSelected" />
+                            </th>
                             <th class="text-sm font-medium text-gray-600 px-6 py-4 text-left" scope="col">
                                 Name
                             </th>
@@ -41,8 +46,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="file in allFiles.data" @click="openFolder(file)" :key="file.id"
-                            class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100">
+                        <tr v-for="file in allFiles.data" :key="file.id"
+                            @click="toggleFileSelected(file)"
+                            @dblclick="openFolder(file)"
+                            class="border-b transition duration-300 ease-in-out hover:bg-blue-100"
+                            :class="(selected[file.id] || allSelected) ? 'bg-blue-50' : 'bg-white'">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <Checkbox @change="$event => onSelectCheckboxChange(file)" v-model="selected[file.id]" :checked="selected[file.id] || allSelected" />
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
                                 <FileIcon :file="file" />
                                 {{ file.name }}
@@ -77,9 +88,12 @@ import { httpGet } from '@/Helpers/http-helper';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { HomeIcon } from '@heroicons/vue/20/solid';
 import { Link, router } from '@inertiajs/vue3';
-import { onMounted, onUpdated } from 'vue';
+import {onMounted, onUpdated, registerRuntimeCompiler} from 'vue';
 import { ref } from 'vue';
+import Checkbox from "@/Components/Checkbox.vue";
 
+const allSelected = ref(false);
+const selected = ref({});
 const loadMoreIntersect = ref(null);
 
 const { files } = defineProps({
@@ -114,6 +128,34 @@ function loadMore() {
             allFiles.value.data = [...allFiles.value.data, ...response.data];
             allFiles.value.next = response.links.next;
         });
+}
+
+function onSelectAllChange() {
+    allFiles.value.data.forEach((file) => {
+        selected.value[file.id] = allSelected.value;
+    })
+}
+
+function toggleFileSelected(file) {
+    selected.value[file.id] = !selected.value[file.id];
+    onSelectCheckboxChange(file);
+}
+
+function onSelectCheckboxChange(file) {
+    if (!selected.value[file.id]) {
+        allSelected.value = false;
+    } else {
+        let checked = true;
+
+        for (let file of allFiles.value.data) {
+            if (!selected.value[file.id]) {
+                checked = false;
+                break;
+            }
+        }
+
+        allSelected.value = checked;
+    }
 }
 
 onMounted(() => {
