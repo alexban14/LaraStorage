@@ -21,9 +21,11 @@
                         </Link>
                     </li>
                 </ol>
+                <div>
+                    <DeleteFilesButton :delete-ids="selectedIds" :delete-all="allSelected" @delete="onDelete"/>
+                </div>
             </nav>
-            <pre>{{ allSelected }}</pre>
-            <pre>{{ selected }}</pre>
+            <pre>{{ selectedIds }}</pre>
             <div class="flex-1 overflow-auto">
                 <table class="min-w-full">
                     <thead class="bg-grey-100 border-b">
@@ -88,9 +90,10 @@ import { httpGet } from '@/Helpers/http-helper';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { HomeIcon } from '@heroicons/vue/20/solid';
 import { Link, router } from '@inertiajs/vue3';
-import {onMounted, onUpdated, registerRuntimeCompiler} from 'vue';
+import {computed, onMounted, onUpdated, registerRuntimeCompiler} from 'vue';
 import { ref } from 'vue';
 import Checkbox from "@/Components/Checkbox.vue";
+import DeleteFilesButton from "@/Components/app/DeleteFilesButton.vue";
 
 const allSelected = ref(false);
 const selected = ref({});
@@ -106,6 +109,8 @@ const allFiles = ref({
     data: files.data,
     next: files.links.next
 })
+
+const selectedIds = computed(() => Object.entries(selected.value).filter(a => a[1]).map(a => a[0]));
 
 function openFolder(file) {
     if (!file.is_folder) {
@@ -156,6 +161,11 @@ function onSelectCheckboxChange(file) {
 
         allSelected.value = checked;
     }
+}
+
+function onDelete() {
+    allSelected.value = false;
+    selected.value = {};
 }
 
 onMounted(() => {

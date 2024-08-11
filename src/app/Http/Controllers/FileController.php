@@ -8,6 +8,7 @@ use App\Http\Requests\DestroyFilesRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -126,9 +127,9 @@ class FileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DestroyFilesRequest $request)
+    public function destroy(DestroyFilesRequest $request): RedirectResponse
     {
-        $data = $request->validate();
+        $data = $request->validated();
         $parent = $request->parent;
 
         if ($data['all']) {
@@ -139,8 +140,10 @@ class FileController extends Controller
             }
         } else {
             foreach ($data['ids'] ?? [] as $id) {
-                $file = File::findById($id);
-                $file->delete();
+                $file = File::whereId($id)->first();
+                if($file) {
+                    $file->delete();
+                }
             }
         }
 
