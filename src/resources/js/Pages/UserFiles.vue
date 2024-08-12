@@ -22,6 +22,7 @@
                     </li>
                 </ol>
                 <div>
+                    <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2" />
                     <DeleteFilesButton :delete-ids="selectedIds" :delete-all="allSelected" @delete="onDelete"/>
                 </div>
             </nav>
@@ -94,6 +95,7 @@ import {computed, onMounted, onUpdated, registerRuntimeCompiler} from 'vue';
 import { ref } from 'vue';
 import Checkbox from "@/Components/Checkbox.vue";
 import DeleteFilesButton from "@/Components/app/DeleteFilesButton.vue";
+import DownloadFilesButton from "@/Components/app/DownloadFilesButton.vue";
 
 const allSelected = ref(false);
 const selected = ref({});

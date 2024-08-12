@@ -35,6 +35,7 @@ Route::controller(FileController::class)
         Route::post('/folder', 'storeFolder')->name('folder.store');
         Route::post('/file', 'store')->name('file.store');
         Route::delete('/file', 'destroy')->name('file.delete');
+        Route::get('/file/download', 'download')->name('file.download');
     });
 
 Route::get('/dashboard', function () {
