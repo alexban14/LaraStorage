@@ -1,8 +1,8 @@
 FROM php:8.3 as php
 
 RUN apt-get update
-RUN apt-get install -y unzip libpq-dev libcurl4-gnutls-dev
-RUN docker-php-ext-install pdo pdo_mysql bcmath
+RUN apt-get install -y unzip libpq-dev libcurl4-gnutls-dev libzip-dev
+RUN docker-php-ext-install pdo pdo_mysql bcmath zip
 
 RUN pecl install -o -f redis \
 	&& rm -rf /tmp/pear \

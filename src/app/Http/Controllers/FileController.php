@@ -152,7 +152,7 @@ class FileController extends Controller
         return to_route('user-files', ['folder' => $parent->path]);
     }
 
-    public function downloadFileRequest(FilesActionRequest $request)
+    public function downloadFiles(FilesActionRequest $request)
     {
         $data = $request->validated();
         $parent = $request->parent;
@@ -166,9 +166,12 @@ class FileController extends Controller
             ];
         }
 
+        $url = null;
+        $filename = null;
+
         if ($all) {
-            $url = $this->createZip($parent->children($parent->id));
-            $fileName = $parent->name . '.zip';
+            $url = $this->createZip($parent->children);
+            $filename = $parent->name . '.zip';
         } else {
             if (count($ids) === 1) {
                 $file = File::find($ids[0]);
@@ -178,10 +181,10 @@ class FileController extends Controller
                             'message' => 'The folder is empty'
                         ];
                     }
-                    $this->createZip($parent->children($parent->id));
-                    $fileName = $parent->name . '.zip';
+                    $url = $this->createZip($file->children);
+                    $filename = $parent->name . '.zip';
                 } else {
-                    $destination = 'public/' . pathinfo($file->storage_path);
+                    $destination = 'public/' . pathinfo($file->storage_path, PATHINFO_BASENAME);
                     Storage::copy($file->storage_path, $destination);
 
                     $url = asset(Storage::url($destination));

@@ -101,15 +101,15 @@ const allSelected = ref(false);
 const selected = ref({});
 const loadMoreIntersect = ref(null);
 
-const { files } = defineProps({
+const props = defineProps({
     files: Object,
     folder: Object,
     ancestors: Object,
 })
 
 const allFiles = ref({
-    data: files.data,
-    next: files.links.next
+    data: props.files.data,
+    next: props.files.links.next
 })
 
 const selectedIds = computed(() => Object.entries(selected.value).filter(a => a[1]).map(a => a[0]));
