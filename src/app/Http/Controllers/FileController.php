@@ -8,6 +8,7 @@ use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class FileController extends Controller
 {
@@ -64,7 +66,7 @@ class FileController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function storeFolder(StoreFolderRequest $request)
+    public function storeFolder(StoreFolderRequest $request): void
     {
         $data = $request->validated();
 
@@ -80,7 +82,7 @@ class FileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function showFiles(Request $request, ?string $folderPath = null)
+    public function showFiles(Request $request, ?string $folderPath = null): Response
     {
         if ($folderPath) {
             $folder = File::where('created_by', Auth::id())
@@ -138,18 +140,31 @@ class FileController extends Controller
             $children = $parent->children;
 
             foreach ($children as $child) {
-                $child->delete();
+                $child->moveToTrash();
             }
         } else {
             foreach ($data['ids'] ?? [] as $id) {
                 $file = File::whereId($id)->first();
                 if($file) {
-                    $file->delete();
+                    $file->moveToTrash();
                 }
             }
         }
 
         return to_route('user-files', ['folder' => $parent->path]);
+    }
+
+    public function trash(Request $request): Response
+    {
+        $files = File::onlyTrashed()
+            ->where('created_by', Auth::id())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(10);
+
+        $files = FileResource::collection($files);
+
+        return Inertia::render('Trash', compact('files'));
     }
 
     public function downloadFiles(FilesActionRequest $request)
@@ -274,4 +289,5 @@ class FileController extends Controller
             }
         }
     }
+
 }

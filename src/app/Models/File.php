@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasCreatorAndUpdater;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -89,5 +90,12 @@ class File extends Model
 //                Storage::delete($model->storage_path);
 //            }
 //        });
+    }
+
+    public function moveToTrash(): bool
+    {
+        $this->deleted_at = Carbon::now();
+
+        return $this->save();
     }
 }

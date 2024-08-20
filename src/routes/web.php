@@ -32,6 +32,7 @@ Route::controller(FileController::class)
         Route::get('/user-files/{folderPath?}', 'showFiles')
             ->where('folderPath', '(.*)')
             ->name('user-files');
+        Route::get('/trash', 'trash')->name('trash');
         Route::post('/folder', 'storeFolder')->name('folder.store');
         Route::post('/file', 'store')->name('file.store');
         Route::delete('/file', 'destroy')->name('file.delete');
