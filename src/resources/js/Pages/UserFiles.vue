@@ -26,7 +26,6 @@
                     <DeleteFilesButton :delete-ids="selectedIds" :delete-all="allSelected" @delete="onDelete"/>
                 </div>
             </nav>
-            <pre>{{ selectedIds }}</pre>
             <div class="flex-1 overflow-auto">
                 <table class="min-w-full">
                     <thead class="bg-grey-100 border-b">
