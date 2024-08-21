@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
+use App\Http\Requests\TrashFilesRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
 use App\Models\User;
@@ -167,7 +168,26 @@ class FileController extends Controller
         return Inertia::render('Trash', compact('files'));
     }
 
-    public function downloadFiles(FilesActionRequest $request)
+    public function restore(TrashFilesRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        if ($data['all']) {
+            $children = File::onlyTrashed()->get();
+            foreach ($children as $child) {
+                $child->restore();
+            }
+        } else {
+            $children = File::onlyTrashed()->whereIn('id', $data['ids'])->get();
+            foreach ($children as $child) {
+                $child->restore();
+            }
+        }
+
+        return to_route('trash');
+    }
+
+    public function download(FilesActionRequest $request)
     {
         $data = $request->validated();
         $parent = $request->parent;

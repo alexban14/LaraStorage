@@ -3,8 +3,7 @@
         <AuthenticatedLayout>
             <nav class="flex items-center justify-between p-1 mb-3">
                 <div>
-                    <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2" />
-                    <DeleteFilesButton :delete-ids="selectedIds" :delete-all="allSelected" @delete="onDelete"/>
+                    <RestoreFilesButton :all-selected="allSelected" :selected-ids="selectedIds" />
                 </div>
             </nav>
             <div class="flex-1 overflow-auto">
@@ -63,6 +62,7 @@ import { ref } from 'vue';
 import Checkbox from "@/Components/Checkbox.vue";
 import DeleteFilesButton from "@/Components/app/DeleteFilesButton.vue";
 import DownloadFilesButton from "@/Components/app/DownloadFilesButton.vue";
+import RestoreFilesButton from "@/Components/app/RestoreFilesButton.vue";
 
 const allSelected = ref(false);
 const selected = ref({});

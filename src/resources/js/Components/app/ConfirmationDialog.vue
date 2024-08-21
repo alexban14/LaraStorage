@@ -9,7 +9,7 @@
                 <SecondaryButton @click="$event => emit('cancel')">Cancel</SecondaryButton>
 
                 <DangerButton class="ml-3" @click="$event => emit('confirm')">
-                    Delete
+                    Confirm
                 </DangerButton>
             </div>
         </div>
