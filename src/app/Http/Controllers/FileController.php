@@ -187,6 +187,25 @@ class FileController extends Controller
         return to_route('trash');
     }
 
+    public function deleteForever(TrashFilesRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        if ($data['all']) {
+            $children = File::onlyTrashed()->get();
+            foreach ($children as $child) {
+                $child->deleteForever();
+            }
+        } else {
+            $children = File::onlyTrashed()->whereIn('id', $data['ids'])->get();
+            foreach ($children as $child) {
+                $child->deleteForever();
+            }
+        }
+
+        return to_route('trash');
+    }
+
     public function download(FilesActionRequest $request)
     {
         $data = $request->validated();
