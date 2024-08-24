@@ -8,16 +8,20 @@ use App\Http\Requests\StoreFolderRequest;
 use App\Http\Requests\TrashFilesRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
+use App\Models\StarredFile;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use function Laravel\Prompts\warning;
 
 class FileController extends Controller
 {
@@ -83,7 +87,7 @@ class FileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function showFiles(Request $request, ?string $folderPath = null): Response
+    public function showFiles(Request $request, ?string $folderPath = null): Response|AnonymousResourceCollection
     {
         if ($folderPath) {
             $folder = File::where('created_by', Auth::id())
@@ -93,12 +97,24 @@ class FileController extends Controller
             $folder = $this->getRoot();
         }
 
-        $files = File::query()->where('parent_id', $folder->id)
-                              ->where('created_by', Auth::id())
-                              ->orderBy('is_folder', 'desc')
-                              ->orderBy('created_at', 'desc')
-                              ->paginate(10);
-                              /* ->paginate(10); */
+        $favorites = (int)$request->get('favorites', 0);
+
+
+        $query = File::query()->select('files.*')
+            ->with(['user', 'starred'])
+            ->where('parent_id', $folder->id)
+            ->where('created_by', Auth::id())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('files.created_at', 'desc')
+            ->orderBy('files.id', 'desc');
+
+
+        if ($favorites === 1) {
+            $query->join('starred_files', 'starred_files.file_id', '=', 'files.id')
+                ->where('starred_files.user_id', Auth::id());
+        }
+
+        $files = $query->paginate(10);
 
         $files = FileResource::collection($files);
 
@@ -220,9 +236,6 @@ class FileController extends Controller
             ];
         }
 
-        $url = null;
-        $filename = null;
-
         if ($all) {
             $url = $this->createZip($parent->children);
             $filename = $parent->name . '.zip';
@@ -257,12 +270,55 @@ class FileController extends Controller
         ];
     }
 
-    public function getRoot()
+    public function markFavorite(Request $request, File $file): RedirectResponse
+    {
+        $data = [];
+        if ($file->is_folder) {
+            $children = $file->children;
+
+            foreach ($children as $child) {
+                $starredFile = StarredFile::where('file_id', $child->id)
+                                            ->where('user_id', Auth::id())
+                                            ->first();
+
+                if ($starredFile) {
+                    $starredFile->destory();
+                    continue;
+                }
+
+                $data[] = [
+                    'file_id' => $child->id,
+                    'user_id' => Auth::id(),
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ];
+            }
+
+            StarredFile::insert($data);
+        } else {
+            $starredFile = StarredFile::where('file_id', $file->id)
+                                        ->where('user_id', Auth::id())
+                                        ->first();
+
+            if ($starredFile) {
+                $starredFile->delete();
+            } else {
+                StarredFile::create([
+                    'file_id' => $file->id,
+                    'user_id' => Auth::id(),
+                ]);
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    private function getRoot()
     {
         return File::query()->whereIsRoot()->where('created_by', Auth::id())->firstOrFail();
     }
 
-    public function saveFileTree(array $fileTree, File $parent, User $user)
+    private function saveFileTree(array $fileTree, File $parent, User $user)
     {
         foreach ($fileTree as $name => $file) {
             if (is_array($file)) {
@@ -283,7 +339,7 @@ class FileController extends Controller
      * @param \App\Models\User $user
      * @param \App\Models\File $parent
      */
-    public function storeFile(UploadedFile $file, User $user, File $parent)
+    private function storeFile(UploadedFile $file, User $user, File $parent)
     {
         $path = $file->store('/files/' . $user->id);
 
@@ -296,7 +352,7 @@ class FileController extends Controller
         $parent->appendNode($model);
     }
 
-    public function createZip($files): string
+    private function createZip($files): string
     {
         $zipPath = 'zip/' . Str::random() . '.zip';
         $publicPath = "public/$zipPath";
