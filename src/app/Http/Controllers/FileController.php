@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FilesActionRequest;
+use App\Http\Requests\ShareFilesRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Requests\TrashFilesRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
+use App\Models\FileShare;
 use App\Models\StarredFile;
 use App\Models\User;
 use Carbon\Carbon;
@@ -61,7 +63,7 @@ class FileController extends Controller
             /**
              * @var \Illuminate\Http\UploadedFile $file
              */
-            foreach($data['files'] as $file) {
+            foreach ($data['files'] as $file) {
                 $this->storeFile($file, $user, $parent);
             }
         }
@@ -162,7 +164,7 @@ class FileController extends Controller
         } else {
             foreach ($data['ids'] ?? [] as $id) {
                 $file = File::whereId($id)->first();
-                if($file) {
+                if ($file) {
                     $file->moveToTrash();
                 }
             }
@@ -278,8 +280,8 @@ class FileController extends Controller
 
             foreach ($children as $child) {
                 $starredFile = StarredFile::where('file_id', $child->id)
-                                            ->where('user_id', Auth::id())
-                                            ->first();
+                    ->where('user_id', Auth::id())
+                    ->first();
 
                 if ($starredFile) {
                     $starredFile->destory();
@@ -297,8 +299,8 @@ class FileController extends Controller
             StarredFile::insert($data);
         } else {
             $starredFile = StarredFile::where('file_id', $file->id)
-                                        ->where('user_id', Auth::id())
-                                        ->first();
+                ->where('user_id', Auth::id())
+                ->first();
 
             if ($starredFile) {
                 $starredFile->delete();
@@ -309,6 +311,48 @@ class FileController extends Controller
                 ]);
             }
         }
+
+        return redirect()->back();
+    }
+
+    public function share(ShareFilesRequest $request)
+    {
+        $data = $request->validated();
+        $parent = $request->parent;
+
+        $all = $data['all'] ?? false;
+        $email = $data['email'] ?? '';
+        $ids = $data['ids'] ?? [];
+
+        if (!$all && empty($ids)) {
+            return [
+                'message' => 'Please select files to share',
+            ];
+        }
+
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return redirect()->back();
+        }
+
+        if (!$all) {
+            $files = $parent->children();
+        } else {
+            $files = File::find($ids);
+        }
+
+        $data = [];
+        foreach ($files as $file) {
+            $data[] = [
+                'file_id' => $file->id,
+                'user_id' => Auth::id(),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
+        }
+
+        FileShare::insert($data);
 
         return redirect()->back();
     }
