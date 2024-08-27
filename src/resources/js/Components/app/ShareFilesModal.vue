@@ -11,11 +11,11 @@
                     type="text"
                     ref="emailInput"
                     class="mt-1 block w-full"
+                    :class="form.errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' "
                     placeholder="Enter email address"
                     @keyup.enter="shareFiles"
                 />
-<!--                    :class="form.errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' "-->
-<!--                <InputError :message="form.errors.name" class="mt-2" />-->
+                <InputError :message="form.errors.email" class="mt-2" />
             </div>
             <div class="mt-6 flex justify-end">
                 <SecondaryButton @click="closeModal"> Cancel </SecondaryButton>
@@ -73,9 +73,9 @@ function shareFiles() {
     form.post(route('file.share'), {
         preserveScroll: true,
         onSuccess: () => {
+            showSuccessNotification('Selected files have been shared to ' + form.email);
             closeModal();
             emit('files-shared');
-            showSuccessNotification('Selected files have been shared successfully');
         }
     });
 }

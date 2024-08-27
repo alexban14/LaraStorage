@@ -26,7 +26,7 @@
                     </MenuItem>
                     <MenuItem v-slot="{ active }">
                         <ResponsiveNavLink
-                            @click="logout"
+                            :href="route('logout')"
                             :class="[
                                 active ? 'bg-violet-500 text-white' : 'text-gray-900',
                                 'group flex w-full items-center rounded-md px-2 py-2 text-sm',
@@ -49,6 +49,7 @@ import { useForm } from '@inertiajs/vue3';
 const form = useForm({});
 
 const logout = () => {
+    console.log("logout")
     form.post(route('logout'));
 }
 </script>

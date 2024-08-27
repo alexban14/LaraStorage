@@ -8,6 +8,7 @@ use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Requests\TrashFilesRequest;
 use App\Http\Resources\FileResource;
+use App\Mail\ShareFilesMail;
 use App\Models\File;
 use App\Models\FileShare;
 use App\Models\StarredFile;
@@ -19,6 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -336,23 +339,36 @@ class FileController extends Controller
             return redirect()->back();
         }
 
-        if (!$all) {
+        if ($all) {
             $files = $parent->children();
         } else {
-            $files = File::find($ids);
+            $files = File::whereIn('id', $ids)->get();
         }
 
-        $data = [];
+        $existingFileIds = FileShare::query()
+            ->whereIn('file_id', $ids)
+            ->where('user_id', $user->id)
+            ->get()
+            ->keyBy('file_id');
+
         foreach ($files as $file) {
-            $data[] = [
+            if ($existingFileIds->has($file->id)) {
+                continue;
+            }
+
+            $insertData[] = [
                 'file_id' => $file->id,
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
         }
 
-        FileShare::insert($data);
+        if (!empty($insertData)) {
+            FileShare::insert($insertData);
+
+            Mail::to($user->email)->send(new ShareFilesMail($user, Auth::user(), $files->toArray()));
+        }
 
         return redirect()->back();
     }
