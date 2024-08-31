@@ -9,13 +9,14 @@
 
 <script setup>
 import ConfirmationDialog from "@/Components/app/ConfirmationDialog.vue";
-import {ref} from "vue";
 import {useForm, usePage} from "@inertiajs/vue3";
 import {showErrorDialog} from "@/event-bus.js";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import {httpGet} from "@/Helpers/http-helper.js";
+import {useRoute} from "vue-router";
 
 const page = usePage();
+const route = useRoute();
 
 const props = defineProps({
     all: {
@@ -26,6 +27,14 @@ const props = defineProps({
     ids: {
         type: Array,
         default: []
+    },
+    downloadRoute: {
+        type: String,
+        // default:
+    },
+    sharedType: {
+        type: String,
+        default: '',
     }
 })
 
@@ -35,7 +44,9 @@ function download() {
     }
 
     const p = new URLSearchParams();
-    p.append('parent_id', page.props.folder.data.id);
+    if (page.props.folder) {
+        p.append('parent_id', page.props.folder.data.id);
+    }
     if (props.all) {
         p.append('all', '1');
     } else {
@@ -43,8 +54,11 @@ function download() {
             p.append('ids[]', id);
         }
     }
+    if (props.sharedType) {
+        p.append('shared_type', props.sharedType)
+    }
 
-    httpGet(route('file.download') + '?' + p.toString())
+    httpGet(props.downloadRoute + '?' + p.toString())
         .then(res => {
             const a = document.createElement('a');
             a.download = res.filename;

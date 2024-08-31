@@ -10,10 +10,26 @@
             <CreateNewDropdown />
 
             <div class="py-3">
-                <NavLink :href="route('user-files')" :active="$page.url == '/user-files'">My Files</NavLink>
-                <NavLink href="/">Shared with me</NavLink>
-                <NavLink href="/">Shared by me</NavLink>
-                <NavLink href="/trash" :active="$page.url == '/trash'">Trash</NavLink>
+                <NavLink
+                    :href="route('user-files')"
+                    :active="$page.url == '/user-files'">
+                    My Files
+                </NavLink>
+                <NavLink
+                    :href="route('file.shared-with-me')"
+                    :active="$page.url == '/file/shared-with-me'">
+                    Shared with me
+                </NavLink>
+                <NavLink
+                    :href="route('file.shared-by-me')"
+                    :active="$page.url == '/file/shared-by-me'">
+                    Shared by me
+                </NavLink>
+                <NavLink
+                    href="/trash"
+                    :active="$page.url == '/trash'">
+                    Trash
+                </NavLink>
             </div>
         </div>
     </nav>

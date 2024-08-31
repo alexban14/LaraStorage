@@ -26,9 +26,19 @@
                         Only Favorites
                         <Checkbox @change="showOnlyFavorites" v-model:checked="onlyFavorites" class="ml-2"/>
                     </label>
-                    <ShareFilesButton :all-selected="allSelected" :selected-ids="selectedIds" class="mr-2" />
-                    <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2" />
-                    <DeleteFilesButton :delete-ids="selectedIds" :delete-all="allSelected" @delete="onDelete"/>
+                    <ShareFilesButton
+                        :all-selected="allSelected"
+                        :selected-ids="selectedIds"
+                        class="mr-2" />
+                    <DownloadFilesButton
+                        :all="allSelected"
+                        :ids="selectedIds"
+                        class="mr-2"
+                        download-route="/file/download" />
+                    <DeleteFilesButton
+                        :delete-ids="selectedIds"
+                        :delete-all="allSelected"
+                        @delete="onDelete"/>
                 </div>
             </nav>
             <div class="flex-1 overflow-auto">

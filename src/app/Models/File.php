@@ -4,14 +4,17 @@ namespace App\Models;
 
 use App\Traits\HasCreatorAndUpdater;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Kalnoy\Nestedset\Collection;
 use Kalnoy\Nestedset\NodeTrait;
 use Illuminate\Support\Str;
 
@@ -75,6 +78,26 @@ class File extends Model
         $power = $this->size > 0 ? floor(log($this->size, 1024)) : 0;
 
         return number_format($this->size / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
+    }
+
+    public static function getSharedWithMe(): Builder
+    {
+        return File::query()
+            ->select('files.*')
+            ->join('file_shares', 'file_shares.file_id', '=', 'files.id')
+            ->where('file_shares.user_id', Auth::id())
+            ->orderBy('file_shares.created_at', 'desc')
+            ->orderBy('files.id', 'desc');
+    }
+
+    public static function getSharedByMe(): Builder
+    {
+        return File::query()
+            ->select('files.*')
+            ->join('file_shares', 'file_shares.file_id', '=', 'files.id')
+            ->where('files.created_by', Auth::id())
+            ->orderBy('file_shares.created_at', 'desc')
+            ->orderBy('files.id', 'desc');
     }
 
     protected static function boot()
