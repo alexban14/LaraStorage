@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lara-storage
+  labels:
+    app: larastorage
+spec:
+  containers:
+  - name: lara-storage
+    image: alexbn14/larastorage:0.1

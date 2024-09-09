@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lara-storage
+  labels:
+    app: larastorage
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: larastorage
+  template:
+    metadata:
+      labels:
+        app: larastorage
+    spec:
+      containers:
+      - name: lara-storage
+        image: alexbn14/larastorage:0.1
