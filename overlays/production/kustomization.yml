@@ -1,0 +1,7 @@
+namePrefix: prod-
+commonLabels:
+  tire: prod
+bases:
+- ../../base
+patches:
+- replica_count.yml

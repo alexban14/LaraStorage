@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lara-storage
+  labels:
+    app: larastorage
+spec:
+  selector:
+    app: larastorage
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
