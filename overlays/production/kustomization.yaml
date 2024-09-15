@@ -1,0 +1,11 @@
+namePrefix: prod-
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../base
+labels:
+- includeSelectors: true
+  pairs:
+    tire: prod
+patches:
+- path: replica_count.yaml

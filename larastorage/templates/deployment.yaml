@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}"
+  labels:
+    app: larastorage
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: larastorage
+  template:
+    metadata:
+      labels:
+        app: larastorage
+    spec:
+      containers:
+      - name: lara-storage
+        image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
